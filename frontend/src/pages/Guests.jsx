@@ -28,6 +28,8 @@ import {
   guestTypes,
 } from "@/constants/guests";
 
+import AddGuestDialog from "@/components/guests/AddGuestDialog";
+
 function Guests() {
   const [search, setSearch] = useState("");
   const [type, setType] = useState("All");
@@ -77,10 +79,7 @@ function Guests() {
           </p>
         </div>
 
-        <Button>
-          <Plus className="mr-2 size-4" />
-          Add Guest
-        </Button>
+        <AddGuestDialog />
       </div>
 
       {/* Summary */}

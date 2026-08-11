@@ -26,9 +26,18 @@ import {
   paymentStatuses,
 } from "@/constants/billing";
 
+import CreateInvoiceDialog from "@/components/billing/CreateInvoiceDialog";
+
+import RecordPaymentDialog from "@/components/billing/RecordPaymentDialog";
+
 function Billing() {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("All");
+
+  const [paymentDialog, setPaymentDialog] = useState({
+    open: false,
+    invoice: null,
+  });
 
   const filteredInvoices = useMemo(() => {
     return invoices.filter((invoice) => {
@@ -78,10 +87,7 @@ function Billing() {
           </p>
         </div>
 
-        <Button>
-          <Plus className="mr-2 size-4" />
-          Create Invoice
-        </Button>
+        <CreateInvoiceDialog />
       </div>
 
       {/* Summary */}
@@ -299,21 +305,38 @@ function Billing() {
 
                     <td className="py-4">
                       <div className="flex justify-end gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          title="View invoice"
-                        >
-                          <Eye className="size-4" />
-                        </Button>
+                        <div className="flex justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            title="View invoice"
+                          >
+                            <Eye className="size-4" />
+                          </Button>
 
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          title="Download invoice"
-                        >
-                          <Download className="size-4" />
-                        </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            title="Download invoice"
+                          >
+                            <Download className="size-4" />
+                          </Button>
+
+                          {invoice.total > invoice.paid && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() =>
+                                setPaymentDialog({
+                                  open: true,
+                                  invoice,
+                                })
+                              }
+                            >
+                              Pay
+                            </Button>
+                          )}
+                        </div>
                       </div>
                     </td>
 
@@ -341,6 +364,17 @@ function Billing() {
 
         </CardContent>
       </Card>
+
+      <RecordPaymentDialog
+        open={paymentDialog.open}
+        onOpenChange={(open) =>
+          setPaymentDialog((previous) => ({
+            ...previous,
+            open,
+          }))
+        }
+        invoice={paymentDialog.invoice}
+      />
 
     </div>
   );

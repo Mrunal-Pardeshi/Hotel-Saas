@@ -23,6 +23,8 @@ import {
   roomTypes,
 } from "@/constants/rooms";
 
+import AddRoomDialog from "@/components/rooms/AddRoomDialog";
+
 function Rooms() {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("All");
@@ -59,10 +61,7 @@ function Rooms() {
           </p>
         </div>
 
-        <Button>
-          <Plus className="mr-2 size-4" />
-          Add Room
-        </Button>
+        <AddRoomDialog />
       </div>
 
       {/* Summary */}

@@ -23,9 +23,19 @@ import {
   bookingStatuses,
 } from "@/constants/bookings";
 
+import NewBookingDialog from "@/components/bookings/NewBookingDialog";
+
+import BookingActionDialog from "@/components/bookings/BookingActionDialog";
+
 function Bookings() {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("All");
+
+  const [actionDialog, setActionDialog] = useState({
+    open: false,
+    action: null,
+    booking: null,
+  });
 
   const filteredBookings = useMemo(() => {
     return bookings.filter((booking) => {
@@ -72,10 +82,7 @@ function Bookings() {
           </p>
         </div>
 
-        <Button>
-          <Plus className="mr-2 size-4" />
-          New Booking
-        </Button>
+        <NewBookingDialog />
       </div>
 
       {/* Summary */}
@@ -285,12 +292,32 @@ function Bookings() {
                     </td>
 
                     <td className="py-4 text-right">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                      >
-                        <Eye className="size-4" />
-                      </Button>
+                      <td className="py-4 text-right">
+                        <div className="flex justify-end gap-1">
+
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() =>
+                              setActionDialog({
+                                open: true,
+                                action:
+                                  booking.status === "Confirmed"
+                                    ? "check-in"
+                                    : "check-out",
+                                booking,
+                              })
+                            }
+                          >
+                            {booking.status === "Confirmed"
+                              ? "Check-In"
+                              : booking.status === "Checked-in"
+                                ? "Check-Out"
+                                : "View"}
+                          </Button>
+
+                        </div>
+                      </td>
                     </td>
 
                   </tr>
@@ -316,6 +343,17 @@ function Bookings() {
 
         </CardContent>
       </Card>
+      <BookingActionDialog
+        open={actionDialog.open}
+        onOpenChange={(open) =>
+          setActionDialog((previous) => ({
+            ...previous,
+            open,
+          }))
+        }
+        booking={actionDialog.booking}
+        action={actionDialog.action}
+      />
     </div>
   );
 }
