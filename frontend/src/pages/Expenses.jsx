@@ -6,11 +6,12 @@ import {
   IndianRupee,
   Search,
   Store,
+  Pencil,
+  Trash2,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
 import {
   Card,
   CardContent,
@@ -19,6 +20,9 @@ import {
 } from "@/components/ui/card";
 
 import ExpenseStatusBadge from "@/components/expenses/ExpenseStatusBadge";
+import AddExpenseDialog from "@/components/expenses/AddExpenseDialog";
+import ViewExpenseDialog from "@/components/expenses/ViewExpenseDialog";
+import EditExpenseDialog from "@/components/expenses/EditExpenseDialog";
 
 import {
   expenses,
@@ -26,28 +30,14 @@ import {
   expenseStatuses,
 } from "@/constants/expenses";
 
-import AddExpenseDialog from "@/components/expenses/AddExpenseDialog";
-
-import ViewExpenseDialog from "@/components/expenses/ViewExpenseDialog";
-
 function formatExpenseDate(date) {
   if (!date) return "—";
 
-  // Keep dates already formatted for display
-  if (/^\d{2} [A-Za-z]{3} \d{4}$/.test(date)) {
-    return date;
-  }
-
-  // Convert ISO dates such as 2026-08-05
-  const isoMatch = date.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  const isoMatch = String(date).match(/^(\d{4})-(\d{2})-(\d{2})$/);
 
   if (isoMatch) {
     const [, year, month, day] = isoMatch;
-    const parsed = new Date(
-      Number(year),
-      Number(month) - 1,
-      Number(day)
-    );
+    const parsed = new Date(Number(year), Number(month) - 1, Number(day));
 
     return parsed.toLocaleDateString("en-GB", {
       day: "2-digit",
@@ -56,12 +46,9 @@ function formatExpenseDate(date) {
     }).replace(",", "");
   }
 
-  // Handle other valid date strings
   const parsed = new Date(date);
 
-  if (Number.isNaN(parsed.getTime())) {
-    return date;
-  }
+  if (Number.isNaN(parsed.getTime())) return date;
 
   return parsed.toLocaleDateString("en-GB", {
     day: "2-digit",
@@ -75,7 +62,10 @@ function Expenses() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
   const [status, setStatus] = useState("All");
+
   const [selectedExpense, setSelectedExpense] = useState(null);
+  const [editingExpense, setEditingExpense] = useState(null);
+  const [deletingExpense, setDeletingExpense] = useState(null);
 
   const handleAddExpense = (newExpense) => {
     setExpenseList((previous) => {
@@ -87,13 +77,34 @@ function Expenses() {
       }, 1000);
 
       return [
-        {
-          ...newExpense,
-          id: `EXP-${highestId + 1}`,
-        },
+        { ...newExpense, id: `EXP-${highestId + 1}` },
         ...previous,
       ];
     });
+  };
+
+  const handleEditExpense = (updatedExpense) => {
+    setExpenseList((previous) =>
+      previous.map((expense) =>
+        expense.id === updatedExpense.id
+          ? updatedExpense
+          : expense
+      )
+    );
+
+    setEditingExpense(null);
+  };
+
+  const handleDeleteExpense = () => {
+    if (!deletingExpense) return;
+
+    setExpenseList((previous) =>
+      previous.filter(
+        (expense) => expense.id !== deletingExpense.id
+      )
+    );
+
+    setDeletingExpense(null);
   };
 
   const filteredExpenses = useMemo(() => {
@@ -116,17 +127,17 @@ function Expenses() {
   }, [expenseList, search, category, status]);
 
   const totalExpenses = expenseList.reduce(
-    (sum, expense) => sum + expense.amount,
+    (sum, expense) => sum + Number(expense.amount || 0),
     0
   );
 
   const paidExpenses = expenseList
     .filter((expense) => expense.status === "Paid")
-    .reduce((sum, expense) => sum + expense.amount, 0);
+    .reduce((sum, expense) => sum + Number(expense.amount || 0), 0);
 
   const pendingExpenses = expenseList
     .filter((expense) => expense.status !== "Paid")
-    .reduce((sum, expense) => sum + expense.amount, 0);
+    .reduce((sum, expense) => sum + Number(expense.amount || 0), 0);
 
   const vendors = new Set(
     expenseList.map((expense) => expense.vendor)
@@ -207,14 +218,14 @@ function Expenses() {
         </Card>
       </div>
 
-      {/* Expense table */}
+      {/* Expense records */}
       <Card>
         <CardHeader>
           <CardTitle>Expense Records</CardTitle>
         </CardHeader>
 
         <CardContent>
-          {/* Filters */}
+          {/* Search and filters */}
           <div className="mb-6 flex flex-col gap-3 lg:flex-row">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -265,7 +276,7 @@ function Expenses() {
                   <th className="pb-3 font-medium text-muted-foreground">Amount</th>
                   <th className="pb-3 font-medium text-muted-foreground">Payment</th>
                   <th className="pb-3 font-medium text-muted-foreground">Status</th>
-                  <th className="pb-3" />
+                  <th className="pb-3 text-right font-medium text-muted-foreground">Actions</th>
                 </tr>
               </thead>
 
@@ -292,7 +303,7 @@ function Expenses() {
                     </td>
 
                     <td className="py-4 font-medium">
-                      ₹{expense.amount.toLocaleString("en-IN")}
+                      ₹{Number(expense.amount).toLocaleString("en-IN")}
                     </td>
 
                     <td className="py-4 text-muted-foreground">
@@ -303,28 +314,44 @@ function Expenses() {
                       <ExpenseStatusBadge status={expense.status} />
                     </td>
 
-                    <td className="py-4 text-right">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        type="button"
-                        onClick={() => setSelectedExpense(expense)}
-                        aria-label={`View ${expense.title}`}
-                      >
-                        <Eye className="size-4" />
-                      </Button>
+                    <td className="py-4">
+                      <div className="flex justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          type="button"
+                          aria-label={`View ${expense.title}`}
+                          onClick={() => setSelectedExpense(expense)}
+                        >
+                          <Eye className="size-4" />
+                        </Button>
+
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          type="button"
+                          aria-label={`Edit ${expense.title}`}
+                          onClick={() => setEditingExpense(expense)}
+                        >
+                          <Pencil className="size-4" />
+                        </Button>
+
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          type="button"
+                          aria-label={`Delete ${expense.title}`}
+                          className="text-destructive hover:text-destructive"
+                          onClick={() => setDeletingExpense(expense)}
+                        >
+                          <Trash2 className="size-4" />
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-            <ViewExpenseDialog
-              open={Boolean(selectedExpense)}
-              onOpenChange={(open) => {
-                if (!open) setSelectedExpense(null);
-              }}
-              expense={selectedExpense}
-            />
           </div>
 
           {filteredExpenses.length === 0 && (
@@ -338,6 +365,66 @@ function Expenses() {
           )}
         </CardContent>
       </Card>
+
+      {/* View expense dialog */}
+      <ViewExpenseDialog
+        open={Boolean(selectedExpense)}
+        onOpenChange={(open) => {
+          if (!open) setSelectedExpense(null);
+        }}
+        expense={selectedExpense}
+      />
+
+      {/* Edit expense dialog */}
+      <EditExpenseDialog
+        open={Boolean(editingExpense)}
+        onOpenChange={(open) => {
+          if (!open) setEditingExpense(null);
+        }}
+        expense={editingExpense}
+        onSave={handleEditExpense}
+      />
+
+      {/* Delete confirmation */}
+      {deletingExpense && (
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/50 p-4">
+          <div
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="delete-expense-title"
+            className="w-full max-w-md rounded-xl border bg-background p-6 shadow-xl"
+          >
+            <h2
+              id="delete-expense-title"
+              className="text-lg font-semibold"
+            >
+              Delete Expense?
+            </h2>
+
+            <p className="mt-2 text-sm text-muted-foreground">
+              Are you sure you want to delete{" "}
+              <strong>{deletingExpense.title}</strong> (
+              {deletingExpense.id})? This action cannot be undone.
+            </p>
+
+            <div className="mt-6 flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setDeletingExpense(null)}
+              >
+                Cancel
+              </Button>
+
+              <Button
+                variant="destructive"
+                onClick={handleDeleteExpense}
+              >
+                Delete Expense
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
