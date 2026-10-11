@@ -1,3 +1,4 @@
+
 import {
   CalendarCheck,
   CalendarDays,
@@ -7,6 +8,7 @@ import {
   Users,
 } from "lucide-react";
 
+import { Link } from "react-router-dom";
 import StatCard from "@/components/dashboard/StatCard";
 import { dashboardStats } from "@/constants/dashboard";
 
@@ -38,42 +40,15 @@ const occupancyData = [
 ];
 
 const arrivals = [
-  {
-    guest: "Rahul Sharma",
-    room: "101",
-    time: "10:30 AM",
-    type: "Check-in",
-  },
-  {
-    guest: "Priya Patel",
-    room: "205",
-    time: "12:00 PM",
-    type: "Check-in",
-  },
-  {
-    guest: "Amit Shah",
-    room: "302",
-    time: "2:30 PM",
-    type: "Check-in",
-  },
+  { guest: "Rahul Sharma", room: "101", time: "10:30 AM" },
+  { guest: "Priya Patel", room: "205", time: "12:00 PM" },
+  { guest: "Amit Shah", room: "302", time: "2:30 PM" },
 ];
 
 const departures = [
-  {
-    guest: "Neha Mehta",
-    room: "104",
-    time: "11:00 AM",
-  },
-  {
-    guest: "Karan Desai",
-    room: "201",
-    time: "11:30 AM",
-  },
-  {
-    guest: "Riya Shah",
-    room: "305",
-    time: "12:00 PM",
-  },
+  { guest: "Neha Mehta", room: "104", time: "11:00 AM" },
+  { guest: "Karan Desai", room: "201", time: "11:30 AM" },
+  { guest: "Riya Shah", room: "305", time: "12:00 PM" },
 ];
 
 const recentBookings = [
@@ -117,35 +92,42 @@ const recentBookings = [
 
 function Dashboard() {
   return (
-    <div className="space-y-6">
-
-      {/* Header */}
-      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-        <div>
+    <div className="mx-auto w-full min-w-0 max-w-[1600px] space-y-4 sm:space-y-6">
+      {/* Dashboard Heading and Actions */}
+      <section className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
           <h1 className="text-2xl font-semibold tracking-tight">
             Dashboard
           </h1>
-
           <p className="mt-1 text-sm text-muted-foreground">
             Here's what's happening at your hotel today.
           </p>
         </div>
 
-        <div className="flex gap-2">
-          <Button variant="outline">
-            <CalendarDays className="mr-2 size-4" />
-            Today
+        <div className="flex w-full items-center gap-2 sm:w-auto sm:shrink-0">
+          <Button
+            type="button"
+            variant="outline"
+            className="h-10 shrink-0 gap-2 px-3"
+          >
+            <CalendarDays className="size-4 shrink-0" />
+            <span>Today</span>
           </Button>
 
-          <Button>
-            <CalendarCheck className="mr-2 size-4" />
-            New Booking
+          <Button
+            asChild
+            className="h-10 min-w-0 flex-1 gap-2 px-3 sm:flex-none"
+          >
+            <Link to="/bookings">
+              <CalendarCheck className="size-4 shrink-0" />
+              <span className="whitespace-nowrap">New Booking</span>
+            </Link>
           </Button>
         </div>
-      </div>
+      </section>
 
       {/* KPI Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <section className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4">
         {dashboardStats.map((stat) => (
           <StatCard
             key={stat.title}
@@ -157,46 +139,48 @@ function Dashboard() {
             icon={stat.icon}
           />
         ))}
-      </div>
+      </section>
 
       {/* Charts */}
-      <div className="grid gap-4 xl:grid-cols-2">
-
-        {/* Revenue */}
-        <Card>
+      <section className="grid min-w-0 grid-cols-1 gap-4 xl:grid-cols-2">
+        <Card className="min-w-0 overflow-hidden">
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
                 <CardTitle>Revenue Overview</CardTitle>
                 <p className="mt-1 text-sm text-muted-foreground">
                   Revenue generated over the last 6 months
                 </p>
               </div>
-
-              <Button variant="ghost" size="icon">
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                aria-label="Revenue chart options"
+                className="shrink-0"
+              >
                 <MoreHorizontal className="size-4" />
               </Button>
             </div>
           </CardHeader>
 
           <CardContent>
-            <div className="flex h-64 items-end gap-3">
+            <div className="flex h-48 items-end gap-2 sm:h-56 sm:gap-3">
               {revenueData.map((item) => {
                 const height = (item.revenue / 300000) * 100;
 
                 return (
                   <div
                     key={item.month}
-                    className="flex flex-1 flex-col items-center gap-2"
+                    className="flex min-w-0 flex-1 flex-col items-center gap-2"
                   >
-                    <div className="flex h-52 w-full items-end">
+                    <div className="flex h-40 w-full items-end sm:h-48">
                       <div
-                        className="w-full rounded-t-md bg-primary/80 transition-all hover:bg-primary"
+                        className="w-full rounded-t-md bg-primary/80 transition-colors hover:bg-primary"
                         style={{ height: `${height}%` }}
-                        title={`₹${item.revenue.toLocaleString("en-IN")}`}
+                        title={`${item.month}: ₹${item.revenue.toLocaleString("en-IN")}`}
                       />
                     </div>
-
                     <span className="text-xs text-muted-foreground">
                       {item.month}
                     </span>
@@ -207,38 +191,41 @@ function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Occupancy */}
-        <Card>
+        <Card className="min-w-0 overflow-hidden">
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
                 <CardTitle>Occupancy Overview</CardTitle>
                 <p className="mt-1 text-sm text-muted-foreground">
                   Average occupancy percentage
                 </p>
               </div>
-
-              <Button variant="ghost" size="icon">
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                aria-label="Occupancy chart options"
+                className="shrink-0"
+              >
                 <MoreHorizontal className="size-4" />
               </Button>
             </div>
           </CardHeader>
 
           <CardContent>
-            <div className="flex h-64 items-end gap-3">
+            <div className="flex h-48 items-end gap-2 sm:h-56 sm:gap-3">
               {occupancyData.map((item) => (
                 <div
                   key={item.month}
-                  className="flex flex-1 flex-col items-center gap-2"
+                  className="flex min-w-0 flex-1 flex-col items-center gap-2"
                 >
-                  <div className="flex h-52 w-full items-end">
+                  <div className="flex h-40 w-full items-end sm:h-48">
                     <div
-                      className="w-full rounded-t-md bg-chart-2/80 transition-all hover:bg-chart-2"
+                      className="w-full rounded-t-md bg-chart-2/80 transition-colors hover:bg-chart-2"
                       style={{ height: `${item.occupancy}%` }}
-                      title={`${item.occupancy}%`}
+                      title={`${item.month}: ${item.occupancy}%`}
                     />
                   </div>
-
                   <span className="text-xs text-muted-foreground">
                     {item.month}
                   </span>
@@ -246,33 +233,27 @@ function Dashboard() {
               ))}
             </div>
 
-            <div className="mt-4 flex items-center justify-between border-t pt-4">
+            <div className="mt-4 flex items-center justify-between gap-2 border-t pt-4">
               <span className="text-sm text-muted-foreground">
                 Current occupancy
               </span>
-
-              <span className="font-semibold">
-                82%
-              </span>
+              <span className="font-semibold">82%</span>
             </div>
           </CardContent>
         </Card>
-      </div>
+      </section>
 
       {/* Today's Operations */}
-      <div className="grid gap-4 lg:grid-cols-2">
-
-        {/* Arrivals */}
-        <Card>
+      <section className="grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-2">
+        <Card className="min-w-0 overflow-hidden">
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <LogIn className="size-4" />
+            <div className="flex items-center justify-between gap-2">
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <LogIn className="size-4 shrink-0" />
                 Today's Arrivals
               </CardTitle>
-
-              <Button variant="ghost" size="sm">
-                View all
+              <Button asChild variant="ghost" size="sm">
+                <Link to="/bookings">View all</Link>
               </Button>
             </div>
           </CardHeader>
@@ -281,25 +262,22 @@ function Dashboard() {
             {arrivals.map((arrival) => (
               <div
                 key={`${arrival.guest}-${arrival.room}`}
-                className="flex items-center justify-between"
+                className="flex min-w-0 items-center justify-between gap-3"
               >
-                <div className="flex items-center gap-3">
-                  <div className="flex size-9 items-center justify-center rounded-full bg-muted">
+                <div className="flex min-w-0 items-center gap-3">
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted">
                     <Users className="size-4" />
                   </div>
-
-                  <div>
-                    <p className="text-sm font-medium">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium">
                       {arrival.guest}
                     </p>
-
                     <p className="text-xs text-muted-foreground">
                       Room {arrival.room}
                     </p>
                   </div>
                 </div>
-
-                <span className="text-sm text-muted-foreground">
+                <span className="shrink-0 text-xs text-muted-foreground sm:text-sm">
                   {arrival.time}
                 </span>
               </div>
@@ -307,17 +285,15 @@ function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Departures */}
-        <Card>
+        <Card className="min-w-0 overflow-hidden">
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <LogOut className="size-4" />
+            <div className="flex items-center justify-between gap-2">
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <LogOut className="size-4 shrink-0" />
                 Today's Departures
               </CardTitle>
-
-              <Button variant="ghost" size="sm">
-                View all
+              <Button asChild variant="ghost" size="sm">
+                <Link to="/bookings">View all</Link>
               </Button>
             </div>
           </CardHeader>
@@ -326,71 +302,72 @@ function Dashboard() {
             {departures.map((departure) => (
               <div
                 key={`${departure.guest}-${departure.room}`}
-                className="flex items-center justify-between"
+                className="flex min-w-0 items-center justify-between gap-3"
               >
-                <div className="flex items-center gap-3">
-                  <div className="flex size-9 items-center justify-center rounded-full bg-muted">
+                <div className="flex min-w-0 items-center gap-3">
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted">
                     <Users className="size-4" />
                   </div>
-
-                  <div>
-                    <p className="text-sm font-medium">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium">
                       {departure.guest}
                     </p>
-
                     <p className="text-xs text-muted-foreground">
                       Room {departure.room}
                     </p>
                   </div>
                 </div>
-
-                <span className="text-sm text-muted-foreground">
+                <span className="shrink-0 text-xs text-muted-foreground sm:text-sm">
                   {departure.time}
                 </span>
               </div>
             ))}
           </CardContent>
         </Card>
-      </div>
+      </section>
 
       {/* Recent Bookings */}
-      <Card>
+      <Card className="min-w-0 overflow-hidden">
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
+          <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+            <div className="min-w-0">
               <CardTitle>Recent Bookings</CardTitle>
               <p className="mt-1 text-sm text-muted-foreground">
                 Latest reservations made at your hotel
               </p>
             </div>
-
-            <Button variant="outline" size="sm">
-              View all bookings
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="w-full sm:w-auto"
+            >
+              <Link to="/bookings">View all bookings</Link>
             </Button>
           </div>
         </CardHeader>
 
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+        <CardContent className="min-w-0">
+          <div className="w-full min-w-0 overflow-x-auto overscroll-x-contain">
+            <table className="w-full min-w-170 text-sm">
               <thead>
                 <tr className="border-b text-left">
-                  <th className="pb-3 font-medium text-muted-foreground">
+                  <th className="whitespace-nowrap pb-3 pr-4 font-medium text-muted-foreground">
                     Booking
                   </th>
-                  <th className="pb-3 font-medium text-muted-foreground">
+                  <th className="whitespace-nowrap pb-3 pr-4 font-medium text-muted-foreground">
                     Guest
                   </th>
-                  <th className="pb-3 font-medium text-muted-foreground">
+                  <th className="whitespace-nowrap pb-3 pr-4 font-medium text-muted-foreground">
                     Room
                   </th>
-                  <th className="pb-3 font-medium text-muted-foreground">
+                  <th className="whitespace-nowrap pb-3 pr-4 font-medium text-muted-foreground">
                     Stay
                   </th>
-                  <th className="pb-3 font-medium text-muted-foreground">
+                  <th className="whitespace-nowrap pb-3 pr-4 font-medium text-muted-foreground">
                     Amount
                   </th>
-                  <th className="pb-3 text-right font-medium text-muted-foreground">
+                  <th className="whitespace-nowrap pb-3 text-right font-medium text-muted-foreground">
                     Status
                   </th>
                 </tr>
@@ -402,34 +379,25 @@ function Dashboard() {
                     key={booking.id}
                     className="border-b last:border-0"
                   >
-                    <td className="py-4 font-medium">
+                    <td className="whitespace-nowrap py-4 pr-4 font-medium">
                       {booking.id}
                     </td>
-
-                    <td className="py-4">
+                    <td className="whitespace-nowrap py-4 pr-4">
                       {booking.guest}
                     </td>
-
-                    <td className="py-4 text-muted-foreground">
+                    <td className="whitespace-nowrap py-4 pr-4 text-muted-foreground">
                       {booking.room}
                     </td>
-
-                    <td className="py-4 text-muted-foreground">
-                      <div>
-                        {booking.checkIn}
-                      </div>
-                      <div>
-                        {booking.checkOut}
-                      </div>
+                    <td className="whitespace-nowrap py-4 pr-4 text-muted-foreground">
+                      <div>{booking.checkIn}</div>
+                      <div>{booking.checkOut}</div>
                     </td>
-
-                    <td className="py-4 font-medium">
+                    <td className="whitespace-nowrap py-4 pr-4 font-medium">
                       {booking.amount}
                     </td>
-
-                    <td className="py-4 text-right">
+                    <td className="whitespace-nowrap py-4 text-right">
                       <span
-                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
+                        className={`inline-flex whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-medium ${
                           booking.status === "Confirmed"
                             ? "bg-green-100 text-green-700"
                             : booking.status === "Checked-in"
@@ -445,9 +413,12 @@ function Dashboard() {
               </tbody>
             </table>
           </div>
+
+          <p className="mt-2 text-xs text-muted-foreground sm:hidden">
+            Swipe horizontally to view all booking details.
+          </p>
         </CardContent>
       </Card>
-
     </div>
   );
 }
